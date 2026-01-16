@@ -94,21 +94,37 @@ class DesignService:
         if not design_file.exists():
             return None
         
-        with open(design_file, 'r') as f:
-            return json.load(f)
+        try:
+            with open(design_file, 'r') as f:
+                return json.load(f)
+        except (IOError, json.JSONDecodeError) as e:
+            print(f"Error reading design file {design_id}: {e}")
+            return None
     
     def list_designs(self) -> list:
         """List all designs"""
         designs = []
         for design_file in self.designs_dir.glob("*.json"):
-            with open(design_file, 'r') as f:
-                designs.append(json.load(f))
+            try:
+                with open(design_file, 'r') as f:
+                    designs.append(json.load(f))
+            except (IOError, json.JSONDecodeError) as e:
+                print(f"Error reading design file {design_file}: {e}")
+                continue
         return designs
     
     def _save_design(self, design_id: str, design_data: Dict[str, Any]):
-        """Save design data to file"""
+        """Save design data to file with error handling"""
         design_file = self.designs_dir / f"{design_id}.json"
-        with open(design_file, 'w') as f:
-            json.dump(design_data, f, indent=2)
+        try:
+            # Write to temporary file first, then rename for atomic operation
+            temp_file = design_file.with_suffix('.tmp')
+            with open(temp_file, 'w') as f:
+                json.dump(design_data, f, indent=2)
+            # Atomic rename (on most filesystems)
+            temp_file.replace(design_file)
+        except (IOError, OSError) as e:
+            print(f"Error saving design file {design_id}: {e}")
+            raise
 
 design_service = DesignService()

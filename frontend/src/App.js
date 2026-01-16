@@ -9,6 +9,11 @@ import { Cpu, Github } from 'lucide-react';
 const POLL_INTERVAL_MS = 2000;
 const MAX_POLL_ATTEMPTS = 20;
 
+// TODO: For production, consider implementing:
+// - Exponential backoff for polling
+// - WebSockets or Server-Sent Events for real-time updates
+// - More efficient state management
+
 function App() {
   const [loading, setLoading] = useState(false);
   const [design, setDesign] = useState(null);
