@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: pcb_rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=pcbuser
+      - RABBITMQ_DEFAULT_PASS=pcbpass
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: pcb_backend
+    ports:
+      - "8000:8000"
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=pcbuser
+      - RABBITMQ_PASS=pcbpass
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - ./backend/designs:/app/designs
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: pcb_worker
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=pcbuser
+      - RABBITMQ_PASS=pcbpass
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - ./backend/designs:/app/designs
+    command: python -m app.worker
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: pcb_frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    stdin_open: true
+    tty: true
+
+volumes:
+  designs:
