@@ -6,7 +6,6 @@ and runs EDA simulations on design files.
 """
 
 import os
-import json
 import asyncio
 from typing import Optional
 

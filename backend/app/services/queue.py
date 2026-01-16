@@ -2,8 +2,7 @@
 Message queue service for job processing.
 """
 
-import json
-from typing import Callable, Optional
+from typing import Awaitable, Callable, Optional
 from app.config import settings
 
 
@@ -53,12 +52,12 @@ class QueueService:
         # Placeholder for message publishing
         pass
 
-    async def consume(self, queue_name: str, callback: Callable):
+    async def consume(self, queue_name: str, callback: Callable[[dict], Awaitable[None]]):
         """Consume messages from a queue.
 
         Args:
             queue_name: Name of the queue.
-            callback: Function to call for each message.
+            callback: Async function to call for each message.
         """
         # Placeholder for message consumption
         pass
