@@ -84,6 +84,13 @@ class IntentParser:
     user requirements and convert them into structured design specifications.
     """
     
+    # SI prefix multipliers for unit conversion
+    SI_PREFIX_MULTIPLIERS: dict[str, float] = {
+        'm': 0.001,      # milli
+        'μ': 0.000001,   # micro
+        'u': 0.000001,   # micro (alternate)
+    }
+    
     BOARD_PATTERNS = {
         BoardType.ESP32: [r'\besp32\b', r'\besp-32\b', r'\bespressif\b'],
         BoardType.LORA: [r'\blora\b', r'\blorawan\b', r'\blong.?range\b'],
@@ -280,9 +287,8 @@ class IntentParser:
         if current_match:
             value = float(current_match.group(1))
             prefix = current_match.group(2)
-            if prefix and prefix.lower() in ['m', 'μ', 'u']:
-                multiplier = {'m': 0.001, 'μ': 0.000001, 'u': 0.000001}.get(prefix.lower(), 1)
-                value *= multiplier
+            if prefix and prefix.lower() in self.SI_PREFIX_MULTIPLIERS:
+                value *= self.SI_PREFIX_MULTIPLIERS.get(prefix.lower(), 1)
             power["current"] = value
         
         # Power consumption
@@ -291,9 +297,8 @@ class IntentParser:
         if power_match:
             value = float(power_match.group(1))
             prefix = power_match.group(2)
-            if prefix and prefix.lower() in ['m', 'μ', 'u']:
-                multiplier = {'m': 0.001, 'μ': 0.000001, 'u': 0.000001}.get(prefix.lower(), 1)
-                value *= multiplier
+            if prefix and prefix.lower() in self.SI_PREFIX_MULTIPLIERS:
+                value *= self.SI_PREFIX_MULTIPLIERS.get(prefix.lower(), 1)
             power["wattage"] = value
         
         return power

@@ -124,6 +124,9 @@ class SchematicGenerator:
     pins, nets, and their interconnections based on the extracted design intent.
     """
     
+    # Configuration constants
+    DEFAULT_CONNECTOR_PIN_COUNT = 10
+    
     # Component library with default configurations
     COMPONENT_LIBRARY: dict[str, dict[str, Any]] = {
         "microcontroller": {
@@ -200,6 +203,7 @@ class SchematicGenerator:
         "connector": {
             "default": {
                 "footprint": "CONN_HDR_2x5",
+                # 10 pins for a standard 2x5 header connector
                 "pins": [
                     (f"P{i}", PinType.BIDIRECTIONAL, i) for i in range(1, 11)
                 ]

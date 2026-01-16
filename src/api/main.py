@@ -10,7 +10,9 @@ from pydantic import BaseModel, Field
 from typing import Any
 
 from ..core.nlp.intent_parser import IntentParser
-from ..core.design.schematic_generator import SchematicGenerator
+from ..core.design.schematic_generator import (
+    SchematicGenerator, Schematic, SchematicComponent, Net, Pin, PinType, NetType
+)
 from ..core.design.validator import DesignValidator
 from ..core.simulation.engine import SimulationEngine, SimulationType
 from ..core.fabrication.vendor import (
@@ -48,6 +50,59 @@ simulation_engine = SimulationEngine()
 vendor_registry = VendorRegistry()
 quote_engine = QuoteEngine(vendor_registry)
 order_manager = OrderManager()
+
+
+def _reconstruct_schematic(schematic_dict: dict[str, Any]) -> Schematic:
+    """
+    Reconstruct a Schematic object from a dictionary representation.
+    
+    Args:
+        schematic_dict: Dictionary containing schematic data.
+        
+    Returns:
+        Reconstructed Schematic object.
+    """
+    components = []
+    for c in schematic_dict.get("components", []):
+        pins = [
+            Pin(
+                pin_id=p["id"],
+                name=p["name"],
+                pin_type=PinType(p["type"]),
+                number=p["number"]
+            )
+            for p in c.get("pins", [])
+        ]
+        components.append(SchematicComponent(
+            component_id=c["id"],
+            reference=c["reference"],
+            component_type=c["type"],
+            value=c.get("value"),
+            footprint=c["footprint"],
+            pins=pins,
+            position=tuple(c.get("position", [0, 0])),
+            rotation=c.get("rotation", 0),
+            properties=c.get("properties", {})
+        ))
+    
+    nets = [
+        Net(
+            net_id=n["id"],
+            name=n["name"],
+            net_type=NetType(n["type"]),
+            connections=[(conn[0], conn[1]) for conn in n["connections"]]
+        )
+        for n in schematic_dict.get("nets", [])
+    ]
+    
+    return Schematic(
+        schematic_id=schematic_dict["schematic_id"],
+        name=schematic_dict["name"],
+        version=schematic_dict["version"],
+        components=components,
+        nets=nets,
+        metadata=schematic_dict.get("metadata", {})
+    )
 
 
 # Request/Response Models
@@ -178,51 +233,7 @@ async def validate_design(request: ValidationRequest):
     Performs electrical rule checks (ERC) and design rule checks (DRC).
     """
     try:
-        # Reconstruct schematic from dict (simplified - in production use proper deserialization)
-        from ..core.design.schematic_generator import Schematic, SchematicComponent, Net, Pin, PinType, NetType
-        
-        components = []
-        for c in request.schematic.get("components", []):
-            pins = [
-                Pin(
-                    pin_id=p["id"],
-                    name=p["name"],
-                    pin_type=PinType(p["type"]),
-                    number=p["number"]
-                )
-                for p in c.get("pins", [])
-            ]
-            components.append(SchematicComponent(
-                component_id=c["id"],
-                reference=c["reference"],
-                component_type=c["type"],
-                value=c.get("value"),
-                footprint=c["footprint"],
-                pins=pins,
-                position=tuple(c.get("position", [0, 0])),
-                rotation=c.get("rotation", 0),
-                properties=c.get("properties", {})
-            ))
-        
-        nets = [
-            Net(
-                net_id=n["id"],
-                name=n["name"],
-                net_type=NetType(n["type"]),
-                connections=[(c[0], c[1]) for c in n["connections"]]
-            )
-            for n in request.schematic.get("nets", [])
-        ]
-        
-        schematic = Schematic(
-            schematic_id=request.schematic["schematic_id"],
-            name=request.schematic["name"],
-            version=request.schematic["version"],
-            components=components,
-            nets=nets,
-            metadata=request.schematic.get("metadata", {})
-        )
-        
+        schematic = _reconstruct_schematic(request.schematic)
         validation_result = design_validator.validate(schematic)
         return validation_result.to_dict()
         
@@ -243,47 +254,7 @@ async def run_simulation(request: SimulationRequest):
     - emc: EMC/EMI analysis
     """
     try:
-        # Reconstruct schematic (simplified)
-        from ..core.design.schematic_generator import Schematic, SchematicComponent, Net, Pin, PinType, NetType
-        
-        components = []
-        for c in request.schematic.get("components", []):
-            pins = [
-                Pin(
-                    pin_id=p["id"],
-                    name=p["name"],
-                    pin_type=PinType(p["type"]),
-                    number=p["number"]
-                )
-                for p in c.get("pins", [])
-            ]
-            components.append(SchematicComponent(
-                component_id=c["id"],
-                reference=c["reference"],
-                component_type=c["type"],
-                value=c.get("value"),
-                footprint=c["footprint"],
-                pins=pins
-            ))
-        
-        nets = [
-            Net(
-                net_id=n["id"],
-                name=n["name"],
-                net_type=NetType(n["type"]),
-                connections=n["connections"]
-            )
-            for n in request.schematic.get("nets", [])
-        ]
-        
-        schematic = Schematic(
-            schematic_id=request.schematic["schematic_id"],
-            name=request.schematic["name"],
-            version=request.schematic["version"],
-            components=components,
-            nets=nets,
-            metadata=request.schematic.get("metadata", {})
-        )
+        schematic = _reconstruct_schematic(request.schematic)
         
         # Run requested simulations
         results = []

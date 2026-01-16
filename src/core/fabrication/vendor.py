@@ -8,7 +8,7 @@ enabling quote requests, order placement, and status tracking.
 from dataclasses import dataclass, field
 from typing import Any
 from enum import Enum
-from datetime import datetime
+from datetime import datetime, timedelta
 import uuid
 
 
@@ -423,7 +423,6 @@ class QuoteEngine:
             lead_time += 2
         
         # Quote valid for 30 days
-        from datetime import timedelta
         valid_until = datetime.now() + timedelta(days=30)
         
         return Quote(
