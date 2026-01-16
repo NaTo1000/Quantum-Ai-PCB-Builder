@@ -1,0 +1,53 @@
+# Quantum AI PCB Builder - Docker Compose Configuration
+# 
+# Usage:
+#   docker-compose up -d          # Start services
+#   docker-compose logs -f        # View logs
+#   docker-compose down           # Stop services
+
+services:
+  # Main API Service
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: quantum-pcb-api
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=production
+      - LOG_LEVEL=info
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - quantum-pcb-network
+
+  # Development service with hot reload
+  api-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: quantum-pcb-api-dev
+    ports:
+      - "8001:8000"
+    environment:
+      - ENVIRONMENT=development
+      - LOG_LEVEL=debug
+    volumes:
+      - ./src:/app/src:ro
+    command: uvicorn src.api.main:app --host 0.0.0.0 --port 8000 --reload
+    profiles:
+      - dev
+    networks:
+      - quantum-pcb-network
+
+networks:
+  quantum-pcb-network:
+    driver: bridge
