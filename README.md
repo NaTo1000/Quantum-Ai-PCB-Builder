@@ -1,5 +1,5 @@
 # Quantum-Ai-PCB-Builder
-AI-Orchestrated Hardware Design Platform for Chip and PCB Schematic Generation, Simulation, and Vendor Integration
+AI-Orchestrated Hardware Design Platform
 
 Quantum-Ai-PCB-Builder is a modular, containerized, full-stack platform for AI-guided hardware design. It enables users to describe desired chip or PCB functionality in natural language or structured prompts, and orchestrates a multi-stage pipeline that synthesizes architecture, generates schematics, performs rule-based design validation, simulates performance, and surfaces vendor options for fabrication and packaging.
 
@@ -20,7 +20,7 @@ The platform is designed for extensibility, with pluggable adapters for LLMs, ED
    - Performs IR drop / EM analysis (stubbed or real).
 4. **Simulation**
    - Executes SPICE or timing simulation on generated netlists or behavioral models.
-   - Scores results against user-defined thresholds (for example, ≥85% confidence).
+   - Scores results against user-defined thresholds and acceptance criteria.
 5. **Vendor Matching**
    - Surfaces compatible foundries, packaging houses, and PCB assemblers based on:
      - Process node requirements.
