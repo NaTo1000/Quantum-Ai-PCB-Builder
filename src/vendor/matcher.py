@@ -188,8 +188,13 @@ class VendorMatcher:
         Note: This is a stub implementation.
         Real implementation would call vendor APIs.
         """
+        from datetime import datetime, timedelta
+
         matching_vendors = self.find_vendors(requirements)
         quotes = []
+
+        # Calculate quote validity (30 days from now)
+        valid_until = (datetime.utcnow() + timedelta(days=30)).strftime("%Y-%m-%d")
 
         for vendor_name, capability in matching_vendors:
             # Stub: Generate placeholder quote
@@ -200,7 +205,7 @@ class VendorMatcher:
                 nre_cost_usd=50000.0,
                 lead_time_weeks=capability.lead_time_weeks,
                 min_order_quantity=capability.min_volume,
-                valid_until="2025-12-31",
+                valid_until=valid_until,
                 notes="Stub quote - contact vendor for actual pricing",
             )
             quotes.append(quote)

@@ -213,15 +213,18 @@ class JobWorker:
         self.queue.update_job(job)
         return True
 
-    def run(self, max_jobs: Optional[int] = None):
+    def run(self, max_jobs: Optional[int] = None, poll_interval: float = 1.0):
         """Run the worker loop.
 
         Args:
             max_jobs: Maximum jobs to process. None for unlimited.
+            poll_interval: Seconds to wait between queue polls when idle.
 
         Note: This is a simple synchronous implementation.
         Production should use async or threading.
         """
+        import time
+
         self._running = True
         jobs_processed = 0
 
@@ -231,6 +234,9 @@ class JobWorker:
 
             if self.process_one():
                 jobs_processed += 1
+            else:
+                # Sleep to avoid busy-waiting when queue is empty
+                time.sleep(poll_interval)
 
     def stop(self):
         """Stop the worker loop."""

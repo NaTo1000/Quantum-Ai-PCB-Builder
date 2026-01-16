@@ -10,7 +10,13 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 from typing import Optional
 from urllib.parse import urlparse, parse_qs
 
-from ..ai import DesignSynthesizer, OpenAIAdapter
+from ..ai import (
+    DesignSynthesizer,
+    LLMAdapter,
+    OpenAIAdapter,
+    ClaudeAdapter,
+    LocalLLMAdapter,
+)
 from ..validation import DesignRuleChecker
 from ..vendor import VendorMatcher, DesignRequirements, PackagingType
 
@@ -228,6 +234,29 @@ class DesignAPIHandler(BaseHTTPRequestHandler):
         self._send_json_response(response)
 
 
+def _create_llm_adapter(provider: str = "openai") -> LLMAdapter:
+    """Create an LLM adapter based on the provider setting.
+
+    Args:
+        provider: The LLM provider name ("openai", "claude", "local").
+
+    Returns:
+        Configured LLM adapter instance.
+    """
+    import os
+
+    provider = os.getenv("LLM_PROVIDER", provider).lower()
+
+    if provider == "claude":
+        return ClaudeAdapter()
+    elif provider == "local":
+        model_path = os.getenv("LLM_MODEL_PATH", "/models/default")
+        return LocalLLMAdapter(model_path=model_path)
+    else:
+        # Default to OpenAI
+        return OpenAIAdapter()
+
+
 def create_app(host: str = "0.0.0.0", port: int = 8080) -> HTTPServer:
     """Create and configure the HTTP server.
 
@@ -238,8 +267,8 @@ def create_app(host: str = "0.0.0.0", port: int = 8080) -> HTTPServer:
     Returns:
         Configured HTTPServer instance.
     """
-    # Initialize components
-    llm_adapter = OpenAIAdapter()
+    # Initialize components with configurable LLM adapter
+    llm_adapter = _create_llm_adapter()
     DesignAPIHandler.synthesizer = DesignSynthesizer(llm_adapter)
     DesignAPIHandler.drc_checker = DesignRuleChecker()
     DesignAPIHandler.vendor_matcher = VendorMatcher()
