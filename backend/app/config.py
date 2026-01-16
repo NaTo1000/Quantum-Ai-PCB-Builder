@@ -3,6 +3,7 @@ Configuration settings for the application
 """
 from pydantic_settings import BaseSettings
 from typing import Optional
+import os
 
 class Settings(BaseSettings):
     """Application settings"""
@@ -20,8 +21,8 @@ class Settings(BaseSettings):
     backend_host: str = "0.0.0.0"
     backend_port: int = 8000
     
-    # Design Storage
-    designs_dir: str = "/app/designs"
+    # Design Storage - use local directory if /app doesn't exist
+    designs_dir: str = "/app/designs" if os.path.exists("/app") else "./designs"
     
     class Config:
         env_file = ".env"

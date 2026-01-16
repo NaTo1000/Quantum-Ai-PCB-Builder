@@ -6,6 +6,9 @@ __pycache__/
 # C extensions
 *.so
 
+# Test files
+test_backend.py
+
 # Distribution / packaging
 .Python
 build/
@@ -143,6 +146,10 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+
+# Design storage
+backend/designs/
+designs/
 
 # Spyder project settings
 .spyderproject
