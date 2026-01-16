@@ -5,7 +5,6 @@ from fastapi import APIRouter, HTTPException, BackgroundTasks
 from typing import List
 from app.models.schemas import DesignRequest, DesignResponse, DesignDetail, DesignStatus
 from app.services.design_service import design_service
-from app.services.rabbitmq_service import rabbitmq_service
 from datetime import datetime
 
 router = APIRouter()
@@ -21,6 +20,11 @@ async def create_design(design_request: DesignRequest, background_tasks: Backgro
         
     Returns:
         Design response with ID and status
+        
+    Note:
+        Currently uses FastAPI BackgroundTasks for simplicity.
+        TODO: For production scale, integrate RabbitMQ message queue
+        via rabbitmq_service for better reliability and scalability.
     """
     try:
         # Create design record

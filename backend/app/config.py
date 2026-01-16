@@ -2,7 +2,7 @@
 Configuration settings for the application
 """
 from pydantic_settings import BaseSettings
-from typing import Optional
+from typing import Optional, List
 import os
 
 class Settings(BaseSettings):
@@ -20,6 +20,10 @@ class Settings(BaseSettings):
     # Backend Configuration
     backend_host: str = "0.0.0.0"
     backend_port: int = 8000
+    
+    # CORS Configuration
+    # TODO: In production, restrict to specific origins
+    cors_origins: List[str] = ["*"]  # Allow all origins for development
     
     # Design Storage - use local directory if /app doesn't exist
     designs_dir: str = "/app/designs" if os.path.exists("/app") else "./designs"

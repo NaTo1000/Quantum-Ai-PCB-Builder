@@ -5,6 +5,10 @@ import { createDesign, getDesign, runSimulation, matchVendors } from './services
 import './App.css';
 import { Cpu, Github } from 'lucide-react';
 
+// Configuration constants
+const POLL_INTERVAL_MS = 2000;
+const MAX_POLL_ATTEMPTS = 20;
+
 function App() {
   const [loading, setLoading] = useState(false);
   const [design, setDesign] = useState(null);
@@ -27,10 +31,9 @@ function App() {
       // Poll for design completion
       let designComplete = false;
       let attempts = 0;
-      const maxAttempts = 20;
 
-      while (!designComplete && attempts < maxAttempts) {
-        await new Promise(resolve => setTimeout(resolve, 2000));
+      while (!designComplete && attempts < MAX_POLL_ATTEMPTS) {
+        await new Promise(resolve => setTimeout(resolve, POLL_INTERVAL_MS));
         
         const designDetails = await getDesign(createResponse.design_id);
         console.log('Design status:', designDetails.status);
