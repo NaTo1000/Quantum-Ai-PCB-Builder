@@ -7,6 +7,10 @@ from app.schemas.design_checks import CheckViolation, DesignCheckResponse
 from app.schemas.schematic import SchematicResponse
 
 
+# Configuration constants for design checks
+MIN_COMPONENT_SPACING = 50  # Minimum spacing between components in design units
+
+
 class DesignChecksService:
     """Service for running automated design checks."""
 
@@ -88,7 +92,7 @@ class DesignChecksService:
                 x2, y2 = comp2.position.get("x", 0), comp2.position.get("y", 0)
 
                 distance = ((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5
-                if distance < 50:
+                if distance < MIN_COMPONENT_SPACING:
                     violations.append(
                         CheckViolation(
                             id=str(uuid.uuid4())[:8],

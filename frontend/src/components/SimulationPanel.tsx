@@ -110,7 +110,7 @@ const SimulationPanel: React.FC<SimulationPanelProps> = ({ schematicId }) => {
                 </li>
                 <li>
                   <span>Current Draw</span>
-                  <span>{result.result.power_report.current_ma?.toFixed(2)} mA</span>
+                  <span>{result.result.power_report.current_ma?.toFixed(2) ?? 'N/A'} mA</span>
                 </li>
                 <li>
                   <span>Efficiency</span>
@@ -118,7 +118,7 @@ const SimulationPanel: React.FC<SimulationPanelProps> = ({ schematicId }) => {
                 </li>
                 <li>
                   <span>Thermal Dissipation</span>
-                  <span>{result.result.power_report.thermal_dissipation_mw?.toFixed(2)} mW</span>
+                  <span>{result.result.power_report.thermal_dissipation_mw?.toFixed(2) ?? 'N/A'} mW</span>
                 </li>
               </ul>
             </div>

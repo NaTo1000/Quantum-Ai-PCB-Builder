@@ -119,8 +119,8 @@ const VendorPanel: React.FC<VendorPanelProps> = ({ schematicId }) => {
                         <span className="badge badge-success" style={{ marginLeft: '0.5rem' }}>BEST</span>
                       )}
                     </td>
-                    <td style={{ textAlign: 'right', padding: '0.75rem' }}>${quote.price_per_unit.toFixed(2)}</td>
-                    <td style={{ textAlign: 'right', padding: '0.75rem' }}>${quote.setup_cost.toFixed(0)}</td>
+                    <td style={{ textAlign: 'right', padding: '0.75rem' }}>${quote.price_per_unit?.toFixed(2) ?? '0.00'}</td>
+                    <td style={{ textAlign: 'right', padding: '0.75rem' }}>${quote.setup_cost?.toFixed(0) ?? '0'}</td>
                     <td style={{ textAlign: 'right', padding: '0.75rem' }}>{quote.lead_time_days} days</td>
                     <td style={{ textAlign: 'right', padding: '0.75rem' }}>{quote.minimum_quantity}</td>
                   </tr>

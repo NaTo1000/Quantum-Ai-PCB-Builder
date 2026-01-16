@@ -8,6 +8,11 @@ from app.schemas.vendors import Quote, Vendor, VendorMatchResponse
 from app.schemas.schematic import SchematicResponse
 
 
+# Configuration constants for vendor matching
+PRICE_WEIGHT = 0.7
+LEAD_TIME_WEIGHT = 0.3
+
+
 class VendorService:
     """Service for vendor matching and quoting."""
 
@@ -141,7 +146,7 @@ class VendorService:
             # Recommend based on price-to-lead-time ratio
             best_quote = min(
                 quotes,
-                key=lambda q: q.price_per_unit * 0.7 + q.lead_time_days * 0.3,
+                key=lambda q: q.price_per_unit * PRICE_WEIGHT + q.lead_time_days * LEAD_TIME_WEIGHT,
             )
             recommended_id = best_quote.vendor_id
 

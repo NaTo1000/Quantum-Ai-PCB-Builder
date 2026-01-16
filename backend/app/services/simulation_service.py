@@ -7,6 +7,12 @@ from app.schemas.simulation import SimulationResult, SimulationResponse
 from app.schemas.schematic import SchematicResponse
 
 
+# Configuration constants for simulation
+DEFAULT_VOLTAGE = 3.3  # Default operating voltage in volts
+VOLTAGE_RIPPLE_BASE = 0.9  # Base voltage ripple factor
+VOLTAGE_RIPPLE_VARIATION = 0.1  # Voltage ripple variation factor
+
+
 class SimulationService:
     """Service for running simulations on schematics."""
 
@@ -74,7 +80,7 @@ class SimulationService:
                 "node": f"V({comp.name})",
                 "type": "voltage",
                 "data": [
-                    {"time": t * 0.001, "value": 3.3 * (0.9 + 0.1 * (i % 3))}
+                    {"time": t * 0.001, "value": DEFAULT_VOLTAGE * (VOLTAGE_RIPPLE_BASE + VOLTAGE_RIPPLE_VARIATION * (i % 3))}
                     for t in range(100)
                 ],
             })
