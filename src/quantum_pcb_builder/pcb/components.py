@@ -147,8 +147,6 @@ class CommunicationModule(BaseComponent):
         """Set specifications after initialization."""
         if not self.specifications:
             self.specifications = self._build_specifications()
-        if not self.specifications:
-            self.specifications = self._build_specifications()
 
     def _build_specifications(self) -> dict[str, Any]:
         """Build specifications dictionary."""
