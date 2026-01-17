@@ -5,6 +5,9 @@ LABEL org.opencontainers.image.title="Quantum-Ai-PCB-Builder" \
       org.opencontainers.image.version="0.1.0"
 
 WORKDIR /app
+COPY entrypoint.sh /app/entrypoint.sh
 COPY README.md /app/README.md
 
-CMD ["sh", "-c", "echo \"Quantum-Ai-PCB-Builder image ready\""]
+RUN chmod +x /app/entrypoint.sh
+
+CMD ["/app/entrypoint.sh"]
