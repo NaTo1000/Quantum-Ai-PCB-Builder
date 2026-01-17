@@ -1,5 +1,5 @@
 # Multi-stage build for optimal image size
-FROM python:3.11-slim as builder
+FROM python:3.11-slim AS builder
 
 # Set build-time environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -22,7 +22,7 @@ COPY src/ ./src/
 RUN pip install build && python -m build --wheel
 
 # Production stage
-FROM python:3.11-slim as production
+FROM python:3.11-slim AS production
 
 # Create non-root user for security
 RUN groupadd -r quantum && useradd -r -g quantum quantum

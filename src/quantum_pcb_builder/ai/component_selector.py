@@ -490,7 +490,7 @@ class ComponentRecommender:
         recommendations = []
         for idx in top_indices:
             comp_id = self.component_ids[idx]
-            if comp_id != component.uuid:
+            if comp_id != component.uuid and comp_id in self.database.components:
                 recommendations.append(self.database.components[comp_id])
                 if len(recommendations) >= n_recommendations:
                     break
