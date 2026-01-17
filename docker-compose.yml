@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  quantum-pcb:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: quantum-pcb-builder:latest
+    container_name: quantum-pcb
+    volumes:
+      - ./designs:/app/designs:ro
+      - ./output:/app/output
+    environment:
+      - QUANTUM_PCB_OUTPUT_DIR=/app/output
+    command: ["demo", "--type", "esp32"]
+
+  # Development service with live code mounting
+  quantum-pcb-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    image: quantum-pcb-builder:dev
+    container_name: quantum-pcb-dev
+    volumes:
+      - ./src:/app/src:ro
+      - ./tests:/app/tests:ro
+      - ./designs:/app/designs:ro
+      - ./output:/app/output
+    environment:
+      - PYTHONDONTWRITEBYTECODE=1
+      - PYTHONUNBUFFERED=1
+    command: ["--help"]
+    profiles:
+      - dev
+
+  # Test runner service
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    image: quantum-pcb-builder:dev
+    container_name: quantum-pcb-test
+    volumes:
+      - ./src:/app/src:ro
+      - ./tests:/app/tests:ro
+      - ./coverage:/app/coverage
+    command: ["pytest", "tests/", "-v", "--cov=src/quantum_pcb_builder", "--cov-report=html:/app/coverage"]
+    profiles:
+      - test
+
+volumes:
+  output:
