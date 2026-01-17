@@ -1,0 +1,29 @@
+# Development Dockerfile with additional tooling
+FROM python:3.11-slim
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy project files
+COPY pyproject.toml README.md LICENSE ./
+COPY src/ ./src/
+COPY tests/ ./tests/
+
+# Install package with development dependencies
+RUN pip install -e ".[dev]"
+
+# Set the entrypoint for development
+ENTRYPOINT ["python", "-m", "quantum_pcb_builder.cli"]
+
+CMD ["--help"]
