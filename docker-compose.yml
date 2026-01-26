@@ -1,0 +1,77 @@
+version: '3.8'
+
+services:
+  # Production service
+  quantum-pcb-builder:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    image: quantum-pcb-builder:latest
+    container_name: quantum-pcb-builder
+    restart: unless-stopped
+    environment:
+      - PYTHONPATH=/app/src
+    volumes:
+      - pcb-data:/app/data
+    networks:
+      - pcb-network
+
+  # Development service with live reload
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    image: quantum-pcb-builder:dev
+    container_name: quantum-pcb-builder-dev
+    volumes:
+      - ./src:/app/src:ro
+      - ./tests:/app/tests:ro
+    environment:
+      - PYTHONPATH=/app/src
+      - PYTHONDONTWRITEBYTECODE=1
+    command: pytest tests/ -v --tb=short
+    networks:
+      - pcb-network
+
+  # Test runner service
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    image: quantum-pcb-builder:dev
+    container_name: quantum-pcb-builder-test
+    volumes:
+      - ./src:/app/src:ro
+      - ./tests:/app/tests:ro
+      - ./coverage:/app/coverage
+    environment:
+      - PYTHONPATH=/app/src
+    command: pytest tests/ -v --cov=src/quantum_pcb_builder --cov-report=xml:/app/coverage/coverage.xml --cov-report=term
+    networks:
+      - pcb-network
+
+  # Linting service
+  lint:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    image: quantum-pcb-builder:dev
+    container_name: quantum-pcb-builder-lint
+    volumes:
+      - ./src:/app/src:ro
+      - ./tests:/app/tests:ro
+    command: sh -c "ruff check src/ tests/ && ruff format --check src/ tests/ && mypy src/ --ignore-missing-imports"
+    networks:
+      - pcb-network
+
+volumes:
+  pcb-data:
+    driver: local
+
+networks:
+  pcb-network:
+    driver: bridge

@@ -114,6 +114,37 @@ pytest tests/ -v
 pytest tests/ -v --cov=src/quantum_pcb_builder
 ```
 
+## Docker
+
+Build and run with Docker:
+
+```bash
+# Build production image
+docker build -t quantum-pcb-builder:latest --target production .
+
+# Build development image
+docker build -t quantum-pcb-builder:dev --target development .
+
+# Run production container
+docker run --rm quantum-pcb-builder:latest
+
+# Run tests in container
+docker run --rm quantum-pcb-builder:dev pytest tests/ -v
+
+# Using docker-compose
+docker-compose up quantum-pcb-builder    # Production
+docker-compose up dev                     # Development with tests
+docker-compose up test                    # Run tests with coverage
+docker-compose up lint                    # Run linting
+```
+
+### Docker Images
+
+| Target | Description | Use Case |
+|--------|-------------|----------|
+| `production` | Minimal image with installed package | Deployment |
+| `development` | Full image with dev dependencies | Testing & Development |
+
 ## CI/CD
 
 This project uses GitHub Actions for continuous integration:
